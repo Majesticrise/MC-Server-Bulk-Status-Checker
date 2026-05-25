@@ -11,39 +11,43 @@
 - 彩色表格输出：支持 ANSI 颜色，清晰展示结果
 - 可配置超时、并发数等参数
 
-🚀 使用方法
-准备服务器列表文件
-创建一个文本文件（例如 servers.txt），每行一个服务器，支持以下格式：
+## 🚀 使用方法
 
-IP:端口
+### 准备服务器列表文件
 
-IP 端口
+创建一个文本文件（例如 `servers.txt`），每行一个服务器，支持以下格式：
 
-仅 IP（默认端口 25565）
+- `IP:端口`
+- `IP 端口`
+- 仅 `IP`（默认端口 25565）
 
 示例：
 
-text
 mc.hypixel.net
 play.cubecraft.net:25565
 192.168.1.100 25565
-运行工具
-bash
+
+### 运行工具
+
 python mc_bulk_checker.py servers.txt
-命令行参数
-参数	类型	默认值	描述
-file	位置参数	无	服务器列表文件路径
---timeout	float	3.0	连接超时时间（秒）
---task-timeout	float	10.0	单个任务等待超时时间（秒）
---workers	int	12	并发任务数
---debug	flag	False	打印调试信息
---inter-check-delay	float	0.2	每个检测阶段之间的延迟（秒）
+
+### 命令行参数
+
+| 参数 | 类型 | 默认值 | 描述 |
+|------|------|--------|------|
+| `file` | 位置参数 | 无 | 服务器列表文件路径 |
+| `--timeout` | float | 3.0 | 连接超时时间（秒） |
+| `--task-timeout` | float | 10.0 | 单个任务等待超时时间（秒） |
+| `--workers` | int | 12 | 并发任务数 |
+| `--debug` | flag | False | 打印调试信息 |
+| `--inter-check-delay` | float | 0.2 | 每个检测阶段之间的延迟（秒） |
+
 示例：
 
-bash
 python mc_bulk_checker.py servers.txt --timeout 5 --workers 20
-📊 输出示例
-text
+
+## 📊 输出示例
+
 正在检测 3 个服务器...
 
 +---------------------------+------+------+-------------+---------+--------------------------------------+------------+
@@ -55,8 +59,9 @@ text
 +---------------------------+------+------+-------------+---------+--------------------------------------+------------+
 
 扫描结束：共扫描 3 次，发现 2 个 Minecraft 服务器，平均速度 0.5 IP/s。
-🧹 项目结构
-text
+
+## 🧹 项目结构
+
 MC-Server-Bulk-Status-Checker/
 ├── README.md
 ├── requirements.txt
@@ -65,8 +70,11 @@ MC-Server-Bulk-Status-Checker/
 ├── checker.py              # 单服务器检测逻辑
 ├── output.py               # 表格输出
 └── utils.py                # 通用工具函数
-📄 许可证
+
+## 📄 许可证
+
 MIT License
 
-🤝 贡献
+## 🤝 贡献
+
 欢迎提交 Issue 和 Pull Request。
