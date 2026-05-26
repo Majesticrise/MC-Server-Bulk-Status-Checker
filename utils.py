@@ -1,6 +1,8 @@
 import re
 import unicodedata
 from typing import List, Tuple, Dict
+import nbtlib
+from pathlib import Path
 
 def sanitize_file_path(file_path: str) -> str:
     cleaned = ''.join(ch for ch in file_path if unicodedata.category(ch)[0] != 'C')
@@ -155,3 +157,46 @@ def parse_address(address: str) -> Tuple[str, int]:
         host, port_part = address.rsplit(':', 1)
         return host, int(port_part)
     return address, 25565
+
+def parse_servers_file_dat(file_path: str) -> List[Tuple[str, int]]:
+    """
+    解析 Minecraft 的 servers.dat 文件（NBT 格式），返回服务器列表。
+    每项为 (host, port)，host 可以是域名或 IP。
+    """
+    servers = []
+    dat_path = Path(file_path)
+    if not dat_path.exists():
+        raise FileNotFoundError(f"文件不存在: {file_path}")
+    
+    try:
+        data = nbtlib.load(dat_path)
+        servers_nbt = data.get("servers")
+        
+        # 确保 servers_nbt 是一个可迭代对象（列表或类似）
+        if servers_nbt is None:
+            return []  # 没有服务器数据，返回空列表
+        
+        for server in servers_nbt:
+            # 获取 IP/地址
+            ip = server.get("ip", "")
+            # 获取端口（如果单独存储）
+            port = server.get("port", 25565)
+            
+            if not ip:
+                continue
+            
+            # 如果 ip 字段已经包含端口（例如 "mc.hypixel.net:25565"），则解析
+            if ":" in ip:
+                host, port_str = ip.rsplit(":", 1)
+                try:
+                    port = int(port_str)
+                except ValueError:
+                    port = 25565
+                host = host
+            else:
+                host = ip
+            
+            servers.append((host, port))
+        return servers
+    except Exception as e:
+        raise RuntimeError(f"解析 servers.dat 失败: {e}")
