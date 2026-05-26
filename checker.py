@@ -3,7 +3,11 @@ from typing import Dict, Optional
 from mcstatus import JavaServer
 from utils import parse_server_type, extract_version, extract_motd_text
 
-async def get_server_status_async(host: str, port: int, timeout: float = 3.0, debug: bool = False) -> Optional[Dict]:
+async def get_server_status_async(host: str, port: int, timeout: float = 3.0, debug: bool = False):
+    """
+    返回 (status_dict, server)
+    server 为 JavaServer 实例，用于后续 ping
+    """
     try:
         if debug:
             print(f"[DEBUG] {host}:{port} 正在解析地址...")
@@ -17,7 +21,7 @@ async def get_server_status_async(host: str, port: int, timeout: float = 3.0, de
         if not isinstance(raw, dict):
             if debug:
                 print(f"[DEBUG] {host}:{port} raw 不是 dict: {type(raw)}")
-            return None
+            return None, None
         version = raw.get('version') or {}
         players = raw.get('players') or {}
         if debug:
@@ -34,15 +38,14 @@ async def get_server_status_async(host: str, port: int, timeout: float = 3.0, de
             },
             'description': raw.get('description'),
             'enforcesSecureChat': raw.get('enforcesSecureChat'),
-            'raw': raw,   # 新增：保存原始数据用于服务端类型识别
-        }
+            'raw': raw,
+        }, server
     except Exception as e:
         if debug:
             print(f"[DEBUG] {host}:{port} 异常: {type(e).__name__}: {e}")
         else:
-            # 非 debug 模式下也打印简洁错误（可选）
             print(f"[连接失败] {host}:{port} - {type(e).__name__}: {e}")
-        return None
+        return None, None
     
 def parse_server_type_from_raw(version_name: str, raw: dict) -> str:
     """
@@ -86,10 +89,11 @@ async def check_server_async(
         'server_version': 'N/A',
         'players_online': 'N/A',
         'players_max': 'N/A',
-        'motd': 'N/A'
+        'motd': 'N/A',
+        'ping': 'N/A'          # 新增
     }
 
-    status = await get_server_status_async(host, port, timeout, debug=debug)
+    status, server = await get_server_status_async(host, port, timeout, debug=debug)
     if status is None:
         if debug:
             print(f"[DEBUG] {host}:{port} 状态获取失败，标记为不可达")
@@ -113,8 +117,25 @@ async def check_server_async(
 
     await asyncio.sleep(inter_check_delay)
     result['online_mode'] = status.get('enforcesSecureChat')
-    if debug:
-        print(f"[DEBUG] {host}:{port} 正版验证: {result['online_mode']}")
-    return result
+    
+    # 获取 Ping 延迟（毫秒）
+    if server is not None:
+        try:
+            ping_result = await server.async_ping()
+            # 兼容不同版本
+            if hasattr(ping_result, 'latency'):
+                ping_ms = ping_result.latency # type: ignore
+            else:
+                ping_ms = ping_result
+            result['ping'] = round(ping_ms, 1)
+        except Exception as e:
+            if debug:
+                print(f"[DEBUG] {host}:{port} Ping 失败: {e}")
+            result['ping'] = 'N/A'
+    else:
+        result['ping'] = 'N/A'
 
+    if debug:
+        print(f"[DEBUG] {host}:{port} 正版验证: {result['online_mode']}, Ping: {result['ping']}ms")
+    return result
 

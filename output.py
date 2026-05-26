@@ -1,10 +1,11 @@
 from typing import List, Dict
 from utils import visible_length
 
-
+from typing import List, Dict
+from utils import visible_length
 
 def print_table(results: List[Dict]):
-    headers = ['IP:Port', '联通', '正版', '服务端类型', '版本', 'MOTD', '在线人数']
+    headers = ['IP:Port', '联通', '正版', '服务端类型', '版本', 'MOTD', '在线人数', '延迟(ms)']
     col_widths = [len(h) for h in headers]
 
     for res in results:
@@ -21,6 +22,7 @@ def print_table(results: List[Dict]):
         else:
             motd_display = motd
         players = f"{res['players_online']}/{res['players_max']}" if res['reachable'] else 'N/A'
+        ping = str(res.get('ping', 'N/A')) if res['reachable'] else 'N/A'
 
         col_widths[0] = max(col_widths[0], len(addr))
         col_widths[1] = max(col_widths[1], len(reachable))
@@ -29,6 +31,7 @@ def print_table(results: List[Dict]):
         col_widths[4] = max(col_widths[4], len(server_version))
         col_widths[5] = max(col_widths[5], visible_length(motd_display))
         col_widths[6] = max(col_widths[6], len(players))
+        col_widths[7] = max(col_widths[7], len(ping))
 
     col_widths = [w + 2 for w in col_widths]
 
@@ -38,7 +41,7 @@ def print_table(results: List[Dict]):
     def print_row(row_data):
         cells = []
         for i, cell in enumerate(row_data):
-            if i == 5:
+            if i == 5:  # MOTD 列
                 padding = col_widths[i] - visible_length(cell) - 2
                 if padding < 0:
                     padding = 0
@@ -65,8 +68,8 @@ def print_table(results: List[Dict]):
         else:
             motd_display = motd
         players = f"{res['players_online']}/{res['players_max']}" if res['reachable'] else 'N/A'
+        ping = str(res.get('ping', 'N/A')) if res['reachable'] else 'N/A'
 
-        print_row([addr, reachable, online_mode, server_type, server_version, motd_display, players])
+        print_row([addr, reachable, online_mode, server_type, server_version, motd_display, players, ping])
 
     print_separator()
-

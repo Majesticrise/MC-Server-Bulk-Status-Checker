@@ -149,7 +149,8 @@ def make_failure_result(address: str) -> Dict:
         'server_version': 'N/A',
         'players_online': 'N/A',
         'players_max': 'N/A',
-        'motd': 'N/A'
+        'motd': 'N/A',
+        'ping': 'N/A'
     }
 
 def parse_address(address: str) -> Tuple[str, int]:

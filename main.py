@@ -1,7 +1,6 @@
 ﻿import argparse
 import asyncio
-import os
-from utils import parse_servers_file, parse_servers_file_dat, sanitize_file_path, make_failure_result, parse_address
+from utils import parse_servers_file, parse_servers_file_dat, sanitize_file_path
 from scan_runner import run_scan_async, retry_failed_async
 from output import print_table
 
